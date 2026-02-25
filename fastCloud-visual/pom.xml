@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>fastCloud-visual</artifactId>
+    <packaging>pom</packaging>
 
     <modules>
         <module>fastCloud-monitor</module>

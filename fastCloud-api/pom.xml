@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>fastCloud-api</artifactId>
+    <packaging>pom</packaging>
 
     <modules>
         <module>fastCloud-api-resource</module>
