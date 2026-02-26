@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>fastCloud-modules</artifactId>
+    <packaging>pom</packaging>
 
     <modules>
         <module>fastCloud-gen</module>
