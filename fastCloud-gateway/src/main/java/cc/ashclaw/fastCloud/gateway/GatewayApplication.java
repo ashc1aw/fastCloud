@@ -1,17 +1,29 @@
 package cc.ashclaw.fastCloud.gateway;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-public class GatewayApplication {
-    static void main() {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        IO.println(String.format("Hello and welcome!"));
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.metrics.buffering.BufferingApplicationStartup;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            IO.println("i = " + i);
-        }
+import static java.lang.IO.println;
+
+@SpringBootApplication
+public class GatewayApplication {
+    void main(String[] args) {
+        SpringApplication application = new SpringApplication(GatewayApplication.class);
+        application.setApplicationStartup(new BufferingApplicationStartup(2048));
+        application.run(args);
+    }
+
+    @Bean
+    public CommandLineRunner printPort(Environment environment) {
+        return args -> {
+            String port = environment.getProperty("local.server.port");
+            println("\u001B[33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001B[0m");
+            println("\u001B[36m   🌐 Gateway is listening on port: \u001B[32m" + port + "\u001B[0m");
+            println("\u001B[33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001B[0m");
+        };
     }
 }
