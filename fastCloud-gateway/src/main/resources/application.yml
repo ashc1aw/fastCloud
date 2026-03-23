@@ -8,6 +8,9 @@ spring:
     name: fastCloud-gateway
   profiles:
     active: @profiles.active@
+  threads:
+    virtual:
+      enabled: true
   cloud:
     nacos:
       server-addr: @nacos.server@
@@ -23,4 +26,6 @@ spring:
       import:
         - optional:nacos:application-common.yml
         - optional:nacos:@spring.application.name@.yml
+      import-check:
+        enabled: false
 

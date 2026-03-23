@@ -1,0 +1,207 @@
+# ===================================================================
+# fastCloud Gateway 完整配置示例
+# 基于 JDK 25 + Spring Cloud Gateway WebMVC + Sentinel
+# ===================================================================
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: fastCloud-gateway
+  profiles:
+    active: @profiles.active@
+  threads:
+    virtual:
+      enabled: true  # 启用虚拟线程（JDK 21+特性）
+  cloud:
+    nacos:
+      server-addr: @nacos.server@
+      username: @nacos.username@
+      password: @nacos.password@
+      discovery:
+        group: @nacos.discovery.group@
+        namespace: @nacos.namespace@
+      config:
+        group: @nacos.config.group@
+        namespace: @nacos.namespace@
+    config:
+      import:
+        - optional:nacos:application-common.yml
+        - optional:nacos:@spring.application.name@.yml
+      import-check:
+        enabled: false
+    sentinel:
+      # Sentinel配置
+      eager: true  # 延迟加载控制台
+      transport:
+        dashboard: localhost:8080  # Sentinel Dashboard地址
+        port: 8719  # 应用与Dashboard通信端口
+      # Sentinel限流规则（支持Nacos动态配置）
+      rules:
+        # 流量控制规则
+        flow:
+          - resource: "/api/**"
+            count: 1000
+            grade: 1
+            strategy: 0
+            control-behavior: 0
+          - resource: "/auth/**"
+            count: 500
+            grade: 1
+          - resource: "/public/**"
+            count: 2000
+            grade: 1
+        # 降级规则
+        degrade:
+          - resource: "/api/**"
+            count: 5
+            time-window: 10
+            grade: 0
+            slow-ratio-threshold: 1.0
+            min-request-amount: 5
+        # 系统规则
+        system:
+          - qps: 10000
+            max-thread: 10000
+            cpu-max: 0.9
+        # 授权规则
+        authority:
+          - resource: "/admin/**"
+            type: 1
+            limit-app: "blacklist"
+    gateway:
+      # 路由配置（通过Nacos配置中心动态管理）
+      routes:
+        # 示例路由配置
+        # - id: system-service
+        #   uri: lb://fastCloud-system
+        #   predicates:
+        #     - Path=/system/**
+        #   filters:
+        #     - StripPrefix=1
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      default-filters:
+        - DedupeResponseHeader=Vary Access-Control-Allow-Origin Access-Control-Allow-Allow-Credentials, RETAIN_FIRST
+
+# ===================================================================
+# 请求日志配置
+# ===================================================================
+request:
+  log:
+    slow-threshold-ms: 3000  # 慢请求阈值（毫秒），超过此值会输出警告日志
+
+# ===================================================================
+# 安全配置
+# ===================================================================
+security:
+  # 白名单配置（不需要认证的路径）
+  white-list:
+    whites:
+      - "/auth/**"
+      - "/public/**"
+      - "/favicon.ico"
+      - "/actuator/**"
+      - "/static/**"
+      - "/health"
+      - "/login"
+
+  # 黑名单配置
+  black-list:
+    enabled: true
+    order: -100  # 过滤器执行顺序（数值越小优先级越高）
+    ip-blacklist:
+      # 精确IP
+      - "192.168.1.100"
+      - "10.0.0.1"
+      # CIDR网段
+      - "10.0.0.0/24"
+      - "172.16.0.0/16"
+      - "192.168.0.0/16"
+    path-blacklist:
+      # 通配符路径
+      - "/admin/**"
+      - "/api/secret/**"
+      - "/test/**"
+      # 精确路径
+      - "/error"
+
+# ===================================================================
+# CORS跨域配置
+# ===================================================================
+cors:
+  enabled: true
+  # 允许的来源（生产环境建议设置为具体域名，不使用*）
+  # 多个域名用逗号分隔
+  allowed-origins: "*"
+  # 允许的HTTP方法
+  allowed-methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS,HEAD"
+  # 允许的请求头（*表示全部）
+  allowed-headers: "*"
+  # 是否允许携带凭证（Cookie、Authorization）
+  # 当为true时，allowed-origins不能设置为*
+  allow-credentials: true
+  # 预检请求缓存时间（秒）
+  max-age: 3600
+  # 前端可访问的响应头
+  exposed-headers: "Content-Disposition,Authorization,X-Total-Count"
+
+# ===================================================================
+# 请求重试配置
+# ===================================================================
+retry:
+  enabled: true
+  # 最大重试次数
+  max-attempts: 3
+  # 可重试的状态码
+  retryable-status-codes: 500,502,503,504
+  # 可重试的HTTP方法
+  retryable-methods: GET,POST,PUT,DELETE
+  # 退避策略
+  backoff:
+    initial-interval: 100  # 初始间隔（毫秒）
+    multiplier: 2.0         # 间隔倍增因子
+    max-interval: 5000     # 最大间隔（毫秒）
+
+# ===================================================================
+# Actuator监控配置
+# ===================================================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+    metrics:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    export:
+      prometheus:
+        enabled: true
+
+# ===================================================================
+# 日志配置
+# ===================================================================
+logging:
+  level:
+    root: INFO
+    cc.ashclaw.fastCloud: DEBUG
+    com.alibaba.csp.sentinel: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/${spring.application.name}.log
+    max-size: 100MB
+    max-history: 30
