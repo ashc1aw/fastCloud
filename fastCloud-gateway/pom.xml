@@ -83,7 +83,12 @@
         <dependency>
             <groupId>cc.ashclaw</groupId>
             <artifactId>fastCloud-api-system</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cc.ashclaw</groupId>
+            <artifactId>fastCloud-common-satoken</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <!--test-->
         <dependency>
