@@ -1,4 +1,4 @@
-package cc.ashclaw.fastCloud.gateway.utils;
+package cc.ashclaw.fastCloud.common.satoken.util;
 
 import cc.ashclaw.common4j.core.convert.Convert;
 import cc.ashclaw.common4j.core.lang.ObjectUtil;

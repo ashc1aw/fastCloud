@@ -1,11 +1,11 @@
 package cc.ashclaw.fastCloud.gateway.filter;
 
+import cc.ashclaw.fastCloud.common.satoken.util.LoginHelper;
 import cc.ashclaw.common4j.core.enums.HttpStatus;
 import cc.ashclaw.common4j.core.exception.SseException;
 import cc.ashclaw.common4j.core.util.StringUtil;
 import cc.ashclaw.common4j.web.util.IpUtil;
 import cc.ashclaw.fastCloud.gateway.config.properties.WhiteListProperties;
-import cc.ashclaw.fastCloud.gateway.utils.LoginHelper;
 import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.stp.StpUtil;
 import jakarta.servlet.FilterChain;
